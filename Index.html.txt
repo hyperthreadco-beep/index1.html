@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Afzal Ahmed Shaikh — Portfolio</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@300;400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────
+   TOKENS  — Endfield palette (from PDF)
+   Light pages: white/off-white bg, black text
+   Dark pages: near-black bg, white text
+   Accent: neon yellow #E8FF00
+   Secondary: cyan #00D4C8, magenta #FF3A8A
+───────────────────────────────────────── */
+:root {
+  /* dark bg tones */
+  --black:   #0A0A0A;
+  --black2:  #0E0E0E;
+  --black3:  #141414;
+  --black4:  #1A1A1A;
+  /* light bg tones (Endfield uses both!) */
+  --light:   #F0F0EC;
+  --light2:  #E8E8E4;
+  --light3:  #DCDCD8;
+  /* core accents */
+  --yellow:  #E8FF00;
+  --cyan:    #00D4C8;
+  --magenta: #FF3A8A;
+  --red:     #FF3A2D;
+  /* text */
+  --white:   #F4F4F0;
+  --dark-text:#0A0A0A;
+  --grey:    #888884;
+  --lgrey:   #555550;
+  --dim:     #3A3A36;
+  /* borders */
+  --border-y: rgba(232,255,0,0.22);
+  --border-d: rgba(10,10,10,0.14);
+  --border-w: rgba(244,244,240,0.09);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
+
+body{
+  background:var(--light);
+  color:var(--dark-text);
+  font-family:'Barlow',sans-serif;
+  overflow-x:hidden;
+  cursor:none;
+}
+
+/* ─────────────────────────────────────────
+   CURSOR  — yellow crosshair style
+───────────────────────────────────────── */
+#cur-dot{
+  width:7px;height:7px;background:var(--yellow);
+  border:1px solid var(--dark-text);
+  position:fixed;pointer-events:none;z-index:99999;
+  transform:translate(-50%,-50%);
+  transition:width .15s,height .15s,background .15s,transform .08s;
+}
+#cur-ring{
+  width:28px;height:28px;
+  border:1.5px solid var(--dark-text);
+  position:fixed;pointer-events:none;z-index:99998;
+  transform:translate(-50%,-50%);opacity:.35;
+  transition:width .28s,height .28s,opacity .2s;
+}
+body.hov #cur-dot{width:12px;height:12px;background:var(--yellow);border-color:var(--dark-text)}
+body.hov #cur-ring{width:44px;height:44px;opacity:.7}
+
+/* ─────────────────────────────────────────
+   SCROLL PROGRESS BAR
+───────────────────────────────────────── */
+#sbar{
+  position:fixed;top:0;left:0;height:3px;
+  background:var(--yellow);z-index:99997;width:0%;
+  box-shadow:0 0 6px var(--yellow);
+  transition:width .06s linear;
+}
+
+/* ─────────────────────────────────────────
+   CRT OVERLAY  (very subtle on light bg)
+───────────────────────────────────────── */
+#static-grain{
+  position:fixed;inset:0;pointer-events:none;z-index:9002;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:1;
+  animation:grain-shift 0.09s steps(1) infinite;
+}
+@keyframes grain-shift{
+  0%  {background-position:0 0}
+  25% {background-position:-40px -60px}
+  50% {background-position:60px 20px}
+  75% {background-position:-20px 50px}
+}
+#scanlines{
+  position:fixed;inset:0;pointer-events:none;z-index:9001;
+  background:repeating-linear-gradient(
+    to bottom,transparent,transparent 3px,
+    rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px
+  );
+}
+#sweep{
+  position:fixed;left:0;top:-200px;width:100%;height:200px;
+  pointer-events:none;z-index:9003;
+  background:linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(232,255,0,0.008) 30%,
+    rgba(255,255,255,0.025) 50%,
+    rgba(232,255,0,0.008) 70%,
+    transparent 100%
+  );
+  animation:sweep 4s linear infinite;
+}
+@keyframes sweep{
+  0%  {transform:translateY(0)}
+  100%{transform:translateY(calc(100vh + 200px))}
+}
+#vglitch{
+  position:fixed;inset:0;pointer-events:none;z-index:9004;opacity:0;
+}
+#vglitch.on{
+  opacity:1;
+  background:repeating-linear-gradient(
+    to right,transparent 0px,transparent 120px,
+    rgba(232,255,0,0.04) 120px,rgba(232,255,0,0.04) 121px
+  );
+  animation:vflash .12s steps(1) 3;
+}
+@keyframes vflash{0%,100%{opacity:0}50%{opacity:1}}
+
+/* ─────────────────────────────────────────
+   PAGE SYSTEM
+   ODD pages  = LIGHT (like Endfield home/operators)
+   EVEN pages = DARK  (like Endfield lore/media)
+───────────────────────────────────────── */
+.page{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 6vw 80px;
+  position:relative;overflow:hidden;
+  scroll-snap-align:start;
+  text-align:center;
+}
+
+/* Endfield diagonal crosshatch grid */
+.page::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(135deg,rgba(0,0,0,0.045) 1px,transparent 1px),
+    linear-gradient(45deg, rgba(0,0,0,0.045) 1px,transparent 1px);
+  background-size:80px 80px;
+  z-index:0;
+}
+
+/* odd = LIGHT background */
+.page:nth-child(odd){
+  background:var(--light);
+  color:var(--dark-text);
+}
+.page:nth-child(odd) .page-title{color:var(--dark-text)}
+.page:nth-child(odd) .eyebrow{color:var(--dark-text)}
+.page:nth-child(odd) .eyebrow::before,.page:nth-child(odd) .eyebrow::after{background:var(--dark-text)}
+.page:nth-child(odd) .divider{background:var(--dark-text)}
+.page:nth-child(odd) .divider::before,.page:nth-child(odd) .divider::after{border-color:var(--dark-text)}
+.page:nth-child(odd)::before{
+  background-image:
+    linear-gradient(135deg,rgba(0,0,0,0.04) 1px,transparent 1px),
+    linear-gradient(45deg, rgba(0,0,0,0.04) 1px,transparent 1px);
+}
+
+/* even = LIGHT background (all pages match Endfield light style) */
+.page:nth-child(even){
+  background:var(--light);
+  color:var(--dark-text);
+}
+.page:nth-child(even) .page-title{color:var(--dark-text)}
+.page:nth-child(even) .eyebrow{color:var(--dark-text)}
+.page:nth-child(even) .eyebrow::before,.page:nth-child(even) .eyebrow::after{background:var(--dark-text)}
+.page:nth-child(even) .divider{background:var(--dark-text)}
+.page:nth-child(even) .divider::before,.page:nth-child(even) .divider::after{border-color:var(--dark-text)}
+.page:nth-child(even)::before{
+  background-image:
+    linear-gradient(135deg,rgba(0,0,0,0.04) 1px,transparent 1px),
+    linear-gradient(45deg, rgba(0,0,0,0.04) 1px,transparent 1px);
+}
+
+.page > *{position:relative;z-index:1}
+
+/* ─────────────────────────────────────────
+   GLITCH KEYFRAMES — contained on the name element
+───────────────────────────────────────── */
+@keyframes name-glitch{
+  0%,100%{ transform:translate(0,0); filter:none; }
+  8%     { transform:translate(-5px,0); filter:brightness(1.7) hue-rotate(60deg) saturate(3); }
+  16%    { transform:translate(5px,0); filter:brightness(0.6) hue-rotate(-80deg); }
+  24%    { transform:translate(-3px,1px); filter:contrast(2.5) hue-rotate(140deg); }
+  32%    { transform:translate(3px,-1px); filter:brightness(1.4) hue-rotate(30deg); }
+  40%    { transform:translate(0,0); filter:none; }
+}
+@keyframes fadeup{to{opacity:1;transform:translateY(0)}}
+@keyframes blink{50%{opacity:0}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.1)}}
+@keyframes hud-ping{0%{transform:scale(1);opacity:.8}100%{transform:scale(2.4);opacity:0}}
+@keyframes typewriter{to{width:100%}}
+
+/* ─────────────────────────────────────────
+   SHARED TYPE
+───────────────────────────────────────── */
+.eyebrow{
+  font-family:'Share Tech Mono',monospace;
+  font-size:14px;letter-spacing:.38em;text-transform:uppercase;
+  margin-bottom:12px;
+  display:flex;align-items:center;justify-content:center;gap:16px;
+}
+.eyebrow::before,.eyebrow::after{content:'';width:30px;height:1px;opacity:.5}
+
+.page-title{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:clamp(56px,8.5vw,108px);
+  letter-spacing:.05em;text-transform:uppercase;line-height:.88;
+  margin-bottom:56px;
+}
+
+/* divider */
+.divider{
+  width:64px;height:2px;
+  margin:0 auto 44px;
+  position:relative;
+}
+.divider::before,.divider::after{
+  content:'';position:absolute;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border:1.5px solid;border-color:inherit;
+}
+.divider::before{left:-12px}
+.divider::after {right:-12px}
+
+/* fade-up */
+.fu{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.fu.vis{opacity:1;transform:translateY(0)}
+
+/* ─────────────────────────────────────────
+   PAGE 1: HERO  (LIGHT — like Endfield home)
+───────────────────────────────────────── */
+#p1{background:var(--light);color:var(--dark-text);justify-content:center;gap:0}
+#p1::before{
+  background-image:
+    linear-gradient(135deg,rgba(0,0,0,0.05) 1px,transparent 1px),
+    linear-gradient(45deg, rgba(0,0,0,0.05) 1px,transparent 1px);
+  background-size:80px 80px;
+}
+
+/* ─── HUD RADAR RING — fixed, always on screen ─── */
+@keyframes hud-slow-spin{ to{transform:translate(-50%,-50%) rotate(360deg)} }
+@keyframes hud-slow-spin-rev{ to{transform:translate(-50%,-50%) rotate(-360deg)} }
+@keyframes hud-scan-rotate{
+  0%{transform:rotate(0deg);opacity:.7}
+  80%{opacity:.7}
+  100%{transform:rotate(360deg);opacity:.7}
+}
+.hud-ring{
+  position:fixed;
+  width:min(72vw,620px);height:min(72vw,620px);
+  border-radius:50%;
+  border:1px solid rgba(0,0,0,0.07);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;z-index:0;
+  animation:hud-slow-spin 40s linear infinite;
+}
+.hud-ring::before{
+  content:'';position:absolute;inset:-20px;border-radius:50%;
+  border:1px dashed rgba(0,0,0,0.05);
+  animation:hud-slow-spin-rev 25s linear infinite;
+}
+.hud-ring::after{
+  content:'';position:absolute;inset:-40px;border-radius:50%;
+  border:1px solid rgba(0,0,0,0.03);
+}
+/* rotating scan arm */
+.hud-scan{
+  position:absolute;inset:0;border-radius:50%;
+  overflow:hidden;pointer-events:none;
+  animation:hud-slow-spin 8s linear infinite;
+}
+.hud-scan::after{
+  content:'';position:absolute;
+  top:50%;left:50%;
+  width:50%;height:1px;
+  background:linear-gradient(to right,transparent,rgba(232,255,0,0.35));
+  transform-origin:left center;
+}
+.hud-ping{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  background:var(--yellow);border:1px solid rgba(0,0,0,0.3);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  z-index:1;
+}
+.hud-ping::after{
+  content:'';position:absolute;inset:-2px;border-radius:50%;
+  border:1px solid rgba(0,0,0,0.3);opacity:.4;
+  animation:hud-ping 2s ease-out infinite;
+}
+/* tick marks on ring */
+.hud-tick{
+  position:absolute;top:0;left:50%;
+  width:1px;height:10px;background:rgba(0,0,0,0.18);
+  transform-origin:bottom center;
+  margin-left:-.5px;
+}
+
+/* ─── DATA TICKER — bottom left fixed ─── */
+#data-ticker{
+  position:fixed;bottom:24px;left:24px;
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.1em;color:var(--dark-text);opacity:.18;
+  pointer-events:none;z-index:8500;line-height:1.9;
+}
+
+/* ─── PARTICLE CANVAS ─── */
+#particle-canvas{
+  position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+}
+
+/* ─── CORNER HUD LABELS on ring ─── */
+.hud-label{
+  position:absolute;font-family:'Share Tech Mono',monospace;
+  font-size:9px;letter-spacing:.2em;color:var(--dark-text);opacity:.25;
+  pointer-events:none;
+}
+
+/* ─── CARD SHIMMER on reveal ─── */
+@keyframes shimmer-pass{0%{left:-80%}100%{left:140%}}
+.edu-card,.ach-card,.lead-card,.contact-card{overflow:hidden}
+.edu-card.vis::before,.ach-card.vis::after{animation:none}
+
+/* ─── COUNTER ANIM ─── */
+@keyframes count-flash{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* hero content */
+.hero-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  gap:0;position:relative;z-index:2;width:100%;max-width:960px;
+}
+
+/* ── GLITCH NAME ──
+   The name itself is the glitch host via JS + pseudo-elements on .hero-name
+*/
+.hero-name-outer{
+  position:relative;display:inline-block;
+  margin-bottom:8px;
+  /* bracket decoration */
+}
+.hero-name-outer::before,.hero-name-outer::after{
+  font-family:'Share Tech Mono',monospace;
+  font-size:clamp(36px,6vw,80px);
+  color:var(--dark-text);opacity:.22;font-weight:400;
+  position:absolute;top:50%;transform:translateY(-52%);
+  pointer-events:none;
+}
+.hero-name-outer::before{content:'[';left:-0.55em}
+.hero-name-outer::after {content:']';right:-0.55em}
+
+/* The actual name element — glitch layers are ::before/::after ON this */
+.hero-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:clamp(60px,10.5vw,128px);
+  letter-spacing:.07em;text-transform:uppercase;line-height:.88;
+  color:var(--dark-text);
+  position:relative;display:inline-block;
+  cursor:none;user-select:none;
+}
+.hero-name .y{color:var(--yellow);-webkit-text-stroke:1px var(--dark-text)}
+
+/* Glitch fires via interval — no pseudo-elements, no overflow */
+.hero-name.glitching{animation:name-glitch 0.5s steps(2) forwards}
+
+/* typewriter subtitle */
+.hero-sub{
+  font-family:'Share Tech Mono',monospace;
+  font-size:13px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--dark-text);opacity:.7;margin-top:22px;
+  overflow:hidden;white-space:nowrap;width:0;display:inline-block;
+  animation:typewriter 1.8s steps(44) .8s forwards;
+}
+.hero-sub-wrap{display:flex;align-items:center;justify-content:center;gap:8px}
+.hero-sub-wrap::before,.hero-sub-wrap::after{
+  content:'//';font-family:'Share Tech Mono',monospace;font-size:12px;
+  color:var(--dark-text);opacity:.3;
+}
+
+/* hero bio */
+.hero-bio{
+  font-size:18px;font-weight:400;line-height:1.85;
+  color:var(--lgrey);margin-top:30px;max-width:620px;
+  opacity:0;transform:translateY(14px);
+  animation:fadeup .7s ease 2.2s forwards;
+}
+
+/* contact row */
+.hero-contacts{
+  display:flex;flex-wrap:wrap;justify-content:center;gap:18px 32px;
+  margin-top:36px;
+  opacity:0;transform:translateY(14px);
+  animation:fadeup .7s ease 2.7s forwards;
+}
+.hero-contacts a{
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  letter-spacing:.1em;color:var(--lgrey);text-decoration:none;
+  transition:color .2s;cursor:none;
+  display:flex;align-items:center;gap:8px;
+}
+.hero-contacts a::before{content:'—';color:var(--dark-text);opacity:.4;font-size:10px}
+.hero-contacts a:hover{color:var(--dark-text)}
+
+/* yellow accent strip at top of hero (Endfield nav bar style) */
+.hero-topbar{
+  position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--yellow);
+  display:flex;
+}
+.hero-topbar::after{
+  content:'';position:absolute;right:0;top:0;width:3px;height:100%;background:var(--dark-text);
+}
+
+/* scroll hint */
+.scroll-hint{
+  position:absolute;bottom:32px;left:50%;transform:translateX(-50%);
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.3em;color:var(--dark-text);opacity:.35;text-transform:uppercase;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+}
+.scroll-hint::after{
+  content:'';width:1px;height:40px;background:var(--dark-text);
+  opacity:.25;animation:pulse 2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────
+   PAGE 2: EDUCATION  (DARK)
+───────────────────────────────────────── */
+.edu-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:2px;
+  width:100%;max-width:1040px;
+  background:rgba(0,0,0,0.1);
+}
+@media(max-width:760px){.edu-grid{grid-template-columns:1fr}}
+
+.edu-card{
+  background:var(--light2);
+  padding:48px 34px;
+  position:relative;overflow:hidden;
+  cursor:none;transition:background .3s;
+  display:flex;flex-direction:column;align-items:center;gap:0;
+}
+.edu-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--yellow);transform:scaleX(0);transform-origin:center;
+  transition:transform .35s ease;
+}
+.edu-card::after{
+  content:'';position:absolute;top:14px;right:14px;
+  width:14px;height:14px;
+  border-top:1.5px solid var(--dark-text);border-right:1.5px solid var(--dark-text);
+  opacity:.2;transition:opacity .3s,width .3s,height .3s;
+}
+.edu-card:hover{background:var(--light3)}
+.edu-card:hover::before{transform:scaleX(1)}
+.edu-card:hover::after{opacity:.7;width:22px;height:22px}
+
+.edu-year{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  letter-spacing:.2em;color:var(--dark-text);opacity:.5;margin-bottom:20px;
+}
+.edu-inst{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:27px;letter-spacing:.04em;text-transform:uppercase;
+  line-height:1.2;margin-bottom:12px;color:var(--dark-text);
+}
+.edu-degree{font-size:17px;font-weight:300;color:var(--lgrey);line-height:1.6}
+
+/* ─────────────────────────────────────────
+   PAGE 3: CERTIFICATIONS  (LIGHT)
+───────────────────────────────────────── */
+#p3 .page-title{color:var(--dark-text)}
+#p3 .eyebrow{color:var(--dark-text)}
+#p3 .eyebrow::before,#p3 .eyebrow::after{background:var(--dark-text);opacity:.4}
+#p3 .divider{background:var(--dark-text)}
+#p3 .divider::before,#p3 .divider::after{border-color:var(--dark-text)}
+
+.cert-list{width:100%;max-width:760px;display:flex;flex-direction:column;gap:2px}
+
+.cert-item{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:22px;
+  padding:24px 34px;
+  background:var(--light2);
+  border-left:3px solid transparent;
+  transition:border-color .25s,background .25s,padding-left .3s;
+  cursor:none;
+}
+.cert-item:hover{border-color:var(--yellow);background:var(--light3);padding-left:46px}
+.cert-item:hover .cert-dot{transform:scale(1.8);background:var(--yellow)}
+
+.cert-dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--lgrey);transition:transform .25s,background .25s;flex-shrink:0;
+}
+.cert-name{
+  font-size:22px;font-weight:600;text-align:left;line-height:1.4;
+  color:var(--dark-text);
+}
+.cert-issuer{
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  letter-spacing:.18em;color:var(--dark-text);opacity:.5;
+  text-transform:uppercase;white-space:nowrap;
+}
+.cert-item:hover .cert-issuer{opacity:1;color:var(--dark-text)}
+
+/* ─────────────────────────────────────────
+   PAGE 4: SKILLS  (DARK)
+───────────────────────────────────────── */
+.skills-wrap{width:100%;max-width:880px;display:flex;flex-direction:column;gap:52px;align-items:center}
+.skill-group{width:100%}
+.skill-group-title{
+  font-family:'Share Tech Mono',monospace;font-size:13px;
+  letter-spacing:.35em;text-transform:uppercase;color:var(--dark-text);
+  margin-bottom:22px;display:flex;align-items:center;justify-content:center;gap:14px;
+}
+.skill-group-title::before,.skill-group-title::after{
+  content:'';width:44px;height:1px;background:var(--dark-text);opacity:.25;
+}
+
+.tag-grid{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+.tag{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:700;font-size:17px;letter-spacing:.1em;text-transform:uppercase;
+  padding:11px 26px;
+  border:1.5px solid rgba(0,0,0,0.2);color:var(--lgrey);
+  background:transparent;cursor:none;
+  position:relative;overflow:hidden;
+  transition:color .22s,border-color .22s;
+}
+.tag::before{
+  content:'';position:absolute;inset:0;
+  background:var(--yellow);
+  transform:translateX(-100%);transition:transform .22s ease;z-index:-1;
+}
+.tag:hover{color:var(--black);border-color:var(--yellow)}
+.tag:hover::before{transform:translateX(0)}
+
+/* ─────────────────────────────────────────
+   PAGE 5: PROJECTS  (LIGHT)
+───────────────────────────────────────── */
+#p5 .page-title{color:var(--dark-text)}
+#p5 .eyebrow{color:var(--dark-text)}
+#p5 .eyebrow::before,#p5 .eyebrow::after{background:var(--dark-text);opacity:.4}
+#p5 .divider{background:var(--dark-text)}
+#p5 .divider::before,#p5 .divider::after{border-color:var(--dark-text)}
+
+.proj-list{width:100%;max-width:940px;display:flex;flex-direction:column;gap:0}
+
+.proj-item{
+  display:grid;grid-template-columns:5px 80px 1fr;
+  align-items:start;gap:0 30px;
+  padding:42px 0;
+  border-bottom:1px solid rgba(0,0,0,0.1);
+  cursor:none;transition:background .25s;
+  text-align:left;
+}
+.proj-bar{background:transparent;align-self:stretch;margin:-42px 0;transition:background .25s}
+.proj-item:hover .proj-bar{background:var(--yellow)}
+.proj-item:hover{background:rgba(232,255,0,0.06)}
+
+.proj-num{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:58px;
+  color:rgba(0,0,0,0.07);line-height:1;transition:color .25s;padding-top:2px;
+}
+.proj-item:hover .proj-num{color:rgba(232,255,0,0.5)}
+
+.proj-title{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:clamp(28px,3.8vw,44px);letter-spacing:.04em;text-transform:uppercase;
+  color:var(--dark-text);margin-bottom:13px;transition:color .25s;
+}
+.proj-item:hover .proj-title{color:var(--dark-text)}
+
+.proj-desc{
+  font-size:17px;font-weight:400;color:var(--lgrey);line-height:1.8;max-width:600px;
+}
+.proj-desc strong{color:var(--dark-text);font-weight:700}
+
+.proj-tag{
+  display:inline-block;margin-top:15px;
+  font-family:'Share Tech Mono',monospace;font-size:9px;
+  letter-spacing:.22em;text-transform:uppercase;
+  padding:5px 15px;border:1.5px solid var(--dark-text);
+  color:var(--dark-text);opacity:.5;
+  transition:background .2s,color .2s,opacity .2s;
+}
+.proj-item:hover .proj-tag{background:var(--yellow);color:var(--black);border-color:var(--yellow);opacity:1}
+
+/* ─────────────────────────────────────────
+   PAGE 6: ACHIEVEMENTS  (DARK)
+───────────────────────────────────────── */
+.ach-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:2px;width:100%;max-width:820px;
+  background:rgba(0,0,0,0.1);
+}
+@media(max-width:600px){.ach-grid{grid-template-columns:1fr}}
+
+.ach-card{
+  background:var(--light2);padding:44px 34px;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;overflow:hidden;cursor:none;transition:background .3s;
+}
+.ach-card::after{
+  content:'';position:absolute;bottom:0;left:0;width:0;height:3px;
+  background:var(--yellow);transition:width .38s ease;
+}
+.ach-card::before{
+  content:'';position:absolute;top:14px;right:14px;
+  width:14px;height:14px;
+  border-top:1.5px solid var(--dark-text);border-right:1.5px solid var(--dark-text);
+  opacity:.15;transition:opacity .3s,width .3s,height .3s;
+}
+.ach-card:hover{background:var(--light3)}
+.ach-card:hover::after{width:100%}
+.ach-card:hover::before{opacity:.6;width:22px;height:22px}
+.ach-card:hover .ach-icon{transform:scale(1.28) rotate(8deg)}
+.ach-icon{font-size:34px;margin-bottom:22px;display:block;transition:transform .3s}
+.ach-text{font-size:20px;font-weight:500;line-height:1.6;max-width:290px;color:var(--dark-text)}
+
+/* ─────────────────────────────────────────
+   PAGE 7: LEADERSHIP  (LIGHT)
+───────────────────────────────────────── */
+#p7 .page-title{color:var(--dark-text)}
+#p7 .eyebrow{color:var(--dark-text)}
+#p7 .eyebrow::before,#p7 .eyebrow::after{background:var(--dark-text);opacity:.4}
+#p7 .divider{background:var(--dark-text)}
+#p7 .divider::before,#p7 .divider::after{border-color:var(--dark-text)}
+
+.lead-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:2px;width:100%;max-width:1040px;
+  background:rgba(0,0,0,0.12);
+}
+@media(max-width:760px){.lead-grid{grid-template-columns:1fr}}
+
+.lead-card{
+  background:var(--light2);padding:48px 34px;
+  display:flex;flex-direction:column;align-items:center;
+  position:relative;overflow:hidden;cursor:none;transition:background .3s;
+  border-top:3px solid transparent;
+}
+.lead-card:nth-child(1){border-top-color:var(--yellow)}
+.lead-card:nth-child(2){border-top-color:var(--cyan)}
+.lead-card:nth-child(3){border-top-color:var(--magenta)}
+.lead-card:hover{background:var(--light3)}
+.lead-card::before{
+  content:'';position:absolute;inset:0;
+  background:rgba(232,255,0,0.06);
+  transform:scaleX(0);transform-origin:center;
+  transition:transform .4s ease;
+}
+.lead-card:hover::before{transform:scaleX(1)}
+.lead-role{
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;
+  font-size:27px;letter-spacing:.04em;text-transform:uppercase;
+  line-height:1.2;margin-bottom:16px;color:var(--dark-text);
+}
+.lead-desc{font-size:17px;font-weight:400;line-height:1.8;color:var(--lgrey)}
+.lead-emoji{font-size:36px;margin-bottom:22px;transition:transform .4s}
+.lead-card:hover .lead-emoji{transform:scale(1.3) rotate(-8deg)}
+
+/* ─────────────────────────────────────────
+   PAGE 8: CONTACT  (LIGHT)
+───────────────────────────────────────── */
+#p8{background:var(--light);color:var(--dark-text)}
+
+.contact-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:2px;width:100%;max-width:720px;
+  background:rgba(0,0,0,0.1);margin-bottom:52px;
+}
+@media(max-width:600px){.contact-grid{grid-template-columns:1fr}}
+
+.contact-card{
+  background:var(--light2);padding:38px 30px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  cursor:none;transition:background .3s;
+  position:relative;overflow:hidden;
+}
+.contact-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--yellow);transform:scaleX(0);transform-origin:center;
+  transition:transform .35s ease;
+}
+.contact-card:hover{background:var(--light3)}
+.contact-card:hover::after{transform:scaleX(1)}
+.contact-icon{font-size:28px;margin-bottom:4px}
+.contact-label{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:.3em;color:var(--dark-text);opacity:.5;text-transform:uppercase;
+}
+.contact-val{font-size:18px;font-weight:400;color:var(--dark-text)}
+.contact-val a{color:inherit;text-decoration:none;cursor:none;transition:color .2s}
+.contact-val a:hover{color:var(--lgrey)}
+
+.footer-name{
+  font-family:'Barlow Condensed',sans-serif;font-weight:900;
+  font-size:clamp(34px,5vw,68px);letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dark-text);cursor:none;transition:letter-spacing .4s;
+  -webkit-text-stroke:0px;
+}
+.footer-name:hover{letter-spacing:.18em}
+.footer-copy{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.25em;color:var(--lgrey);margin-top:16px;text-transform:uppercase;
+}
+
+/* ─────────────────────────────────────────
+   NAV DOTS
+───────────────────────────────────────── */
+#nav-dots{
+  position:fixed;right:26px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:13px;z-index:9000;
+}
+.ndot{
+  width:7px;height:7px;
+  background:rgba(0,0,0,0.2);
+  border:1px solid rgba(0,0,0,0.25);
+  cursor:none;
+  transition:background .25s,transform .25s,border-color .25s;
+}
+.ndot.active{background:var(--yellow);border-color:var(--yellow);transform:scale(1.5)}
+.ndot:hover{background:var(--yellow);border-color:var(--yellow)}
+/* all pages are light — no dark-nav variant needed */
+
+/* ═══════════════════════════════════════
+   HUD BACKGROUND CANVAS
+═══════════════════════════════════════ */
+#hud-canvas{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+}
+
+/* ═══════════════════════════════════════
+   LOADING SCREEN
+═══════════════════════════════════════ */
+#loader{
+  position:fixed;inset:0;
+  background:var(--light);
+  z-index:99995;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  transition:opacity .8s ease;
+  overflow:hidden;
+}
+#loader.out{opacity:0;pointer-events:none}
+
+.loader-topbar{
+  position:absolute;top:0;left:0;right:0;height:4px;
+  background:var(--yellow);
+}
+.loader-topbar::after{
+  content:'';position:absolute;right:0;top:0;
+  width:3px;height:100%;background:var(--dark-text);
+}
+.loader-crosshatch{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:
+    linear-gradient(135deg,rgba(0,0,0,0.04) 1px,transparent 1px),
+    linear-gradient(45deg,rgba(0,0,0,0.04) 1px,transparent 1px);
+  background-size:80px 80px;
+}
+.loader-ring{
+  position:absolute;
+  width:min(72vw,620px);height:min(72vw,620px);
+  border-radius:50%;border:1px solid rgba(0,0,0,0.07);
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  pointer-events:none;
+  animation:hud-slow-spin 40s linear infinite;
+}
+.loader-ring::before{
+  content:'';position:absolute;inset:-20px;border-radius:50%;
+  border:1px dashed rgba(0,0,0,0.05);
+  animation:hud-slow-spin-rev 25s linear infinite;
+}
+.loader-ring::after{
+  content:'';position:absolute;inset:-40px;border-radius:50%;
+  border:1px solid rgba(0,0,0,0.03);
+}
+.loader-scan{
+  position:absolute;inset:calc(50% - min(36vw,310px));
+  border-radius:50%;overflow:hidden;pointer-events:none;
+  animation:hud-slow-spin 8s linear infinite;
+}
+.loader-scan::after{
+  content:'';position:absolute;
+  top:50%;left:50%;
+  width:50%;height:1px;
+  background:linear-gradient(to right,transparent,rgba(232,255,0,0.4));
+  transform-origin:left center;
+}
+
+#loader-eyebrow{
+  font-family:'Share Tech Mono',monospace;
+  font-size:11px;letter-spacing:.45em;text-transform:uppercase;
+  color:var(--dark-text);opacity:.4;
+  margin-bottom:24px;position:relative;z-index:1;
+  display:flex;align-items:center;gap:14px;
+}
+#loader-eyebrow::before,#loader-eyebrow::after{
+  content:'';width:28px;height:1px;background:var(--dark-text);opacity:.4;
+}
+#loader-name{
+  font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:clamp(42px,7vw,92px);
+  letter-spacing:.07em;text-transform:uppercase;line-height:.9;
+  color:var(--dark-text);
+  margin-bottom:44px;position:relative;z-index:1;text-align:center;
+}
+#loader-name .y{color:var(--yellow);-webkit-text-stroke:1px var(--dark-text)}
+
+#loader-log{
+  font-family:'Share Tech Mono',monospace;font-size:12px;
+  letter-spacing:.08em;color:var(--lgrey);
+  margin-bottom:22px;min-height:5.5em;
+  text-align:left;width:clamp(260px,32vw,440px);
+  line-height:1.9;position:relative;z-index:1;
+}
+#loader-bar-wrap{
+  width:clamp(260px,32vw,440px);height:2px;
+  background:rgba(0,0,0,0.1);
+  margin-bottom:22px;position:relative;z-index:1;
+}
+#loader-bar{
+  height:100%;background:var(--yellow);width:0;
+  transition:width .55s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 8px var(--yellow);
+}
+#loader-pct{
+  font-family:'Share Tech Mono',monospace;font-size:10px;
+  letter-spacing:.2em;color:var(--dark-text);opacity:.35;
+  position:absolute;right:0;top:-18px;
+}
+#loader-done{
+  font-family:'Share Tech Mono',monospace;font-size:11px;
+  letter-spacing:.38em;text-transform:uppercase;
+  color:var(--dark-text);opacity:0;
+  transition:opacity .5s ease;position:relative;z-index:1;
+}
+#loader-done.show{opacity:.55}
+
+/* corner tick marks on loader ring */
+.loader-corner{
+  position:absolute;pointer-events:none;
+  width:36px;height:36px;
+}
+.loader-corner.tl{top:28px;left:28px;
+  border-top:1.5px solid rgba(0,0,0,0.18);
+  border-left:1.5px solid rgba(0,0,0,0.18);}
+.loader-corner.tr{top:28px;right:28px;
+  border-top:1.5px solid rgba(0,0,0,0.18);
+  border-right:1.5px solid rgba(0,0,0,0.18);}
+.loader-corner.bl{bottom:28px;left:28px;
+  border-bottom:1.5px solid rgba(0,0,0,0.18);
+  border-left:1.5px solid rgba(0,0,0,0.18);}
+.loader-corner.br{bottom:28px;right:28px;
+  border-bottom:1.5px solid rgba(0,0,0,0.18);
+  border-right:1.5px solid rgba(0,0,0,0.18);}
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     LOADING SCREEN
+══════════════════════════════════════════ -->
+<div id="loader">
+  <div class="loader-topbar"></div>
+  <div class="loader-crosshatch"></div>
+  <div class="loader-ring"></div>
+  <div class="loader-scan"></div>
+  <div class="loader-corner tl"></div>
+  <div class="loader-corner tr"></div>
+  <div class="loader-corner bl"></div>
+  <div class="loader-corner br"></div>
+  <div id="loader-eyebrow">PORTFOLIO INIT</div>
+  <div id="loader-log"></div>
+  <div id="loader-bar-wrap">
+    <span id="loader-pct">0%</span>
+    <div id="loader-bar"></div>
+  </div>
+  <div id="loader-done">— SYSTEM READY —</div>
+</div>
+
+<!-- HUD Background Canvas -->
+<canvas id="hud-canvas"></canvas>
+
+<!-- Particle canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- Fixed HUD ring — stays on screen always, content flows over -->
+<div class="hud-ring" id="hud-ring-global">
+  <div class="hud-scan"></div>
+  <div class="hud-ping"></div>
+  <div class="hud-tick" style="transform:rotate(0deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(45deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(90deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(135deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(180deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(225deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(270deg) translateY(-100%)"></div>
+  <div class="hud-tick" style="transform:rotate(315deg) translateY(-100%)"></div>
+</div>
+
+<!-- Data ticker -->
+<div id="data-ticker"></div>
+
+<!-- FX layers -->
+<div id="static-grain"></div>
+<div id="scanlines"></div>
+<div id="sweep"></div>
+<div id="vglitch"></div>
+
+<!-- UI chrome -->
+<div id="sbar"></div>
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+
+<!-- Side nav dots -->
+<nav id="nav-dots">
+  <div class="ndot active" data-page="0" title="Intro"></div>
+  <div class="ndot" data-page="1" title="Education"></div>
+  <div class="ndot" data-page="2" title="Certifications"></div>
+  <div class="ndot" data-page="3" title="Skills"></div>
+  <div class="ndot" data-page="4" title="Projects"></div>
+  <div class="ndot" data-page="5" title="Achievements"></div>
+  <div class="ndot" data-page="6" title="Leadership"></div>
+  <div class="ndot" data-page="7" title="Contact"></div>
+</nav>
+
+<!-- ══════════════════════════════════════════
+     PAGE 1 — HERO / INTRO
+══════════════════════════════════════════ -->
+<section class="page" id="p1">
+  <!-- Endfield-style yellow top bar -->
+  <div class="hero-topbar"></div>
+
+  <div class="hero-wrap fu">
+
+    <!-- Name with on-hover glitch -->
+    <div class="hero-name-outer">
+      <div class="hero-name" id="glitch-name" data-name="AFZAL AHMED SHAIKH">
+        AFZAL <span class="y">AHMED</span> SHAIKH
+      </div>
+    </div>
+
+    <!-- Subtitle typewriter -->
+    <div class="hero-sub-wrap">
+      <div class="hero-sub">MBA · Digital Marketing · Mumbai, India</div>
+    </div>
+
+    <!-- Bio -->
+    <p class="hero-bio">
+      MBA student specializing in Digital Marketing and Advertising with a strong interest in social media marketing, branding, content creation, and digital strategy. Familiar with AI tools, Canva, and marketing fundamentals through academic projects, self-learning, and personal projects. Eager to gain practical industry experience and contribute to creative and marketing-focused teams.
+    </p>
+
+    <!-- Contacts -->
+    <div class="hero-contacts">
+      <a href="mailto:afz.tabrez@gmail.com">afz.tabrez@gmail.com</a>
+      <a href="tel:8209036709">+91 82090 36709</a>
+      <a href="#">LinkedIn: Afzal Shaikh</a>
+      <a href="#">Mumbai, India</a>
+    </div>
+
+  </div>
+
+  <div class="scroll-hint">Scroll</div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2 — EDUCATION
+══════════════════════════════════════════ -->
+<section class="page" id="p2">
+  <div class="eyebrow fu">01 — Academic Background</div>
+  <h2 class="page-title fu">Education</h2>
+  <div class="divider fu"></div>
+  <div class="edu-grid">
+
+    <div class="edu-card fu">
+      <div class="edu-year">AUG 2025 – PRESENT</div>
+      <div class="edu-inst">Atlas Skilltech<br>University</div>
+      <div class="edu-degree">Masters of Business Administration</div>
+    </div>
+
+    <div class="edu-card fu">
+      <div class="edu-year">JULY 2021 – JUNE 2023</div>
+      <div class="edu-inst">Mumbai<br>University</div>
+      <div class="edu-degree">Bachelor's of Management Studies</div>
+    </div>
+
+    <div class="edu-card fu">
+      <div class="edu-year">JULY 2019 – JUNE 2021</div>
+      <div class="edu-inst">Central Board of Secondary Education</div>
+      <div class="edu-degree">Junior School, High School, Junior College — Commerce Stream</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3 — CERTIFICATIONS
+══════════════════════════════════════════ -->
+<section class="page" id="p3">
+  <div class="eyebrow fu">02 — Credentials</div>
+  <h2 class="page-title fu">Certifications</h2>
+  <div class="divider fu"></div>
+  <div class="cert-list">
+
+    <div class="cert-item fu">
+      <div class="cert-dot"></div>
+      <div class="cert-name">Generative AI for Digital Marketing</div>
+      <div class="cert-issuer">Coursera</div>
+    </div>
+
+    <div class="cert-item fu">
+      <div class="cert-dot"></div>
+      <div class="cert-name">Frictionless Sales</div>
+      <div class="cert-issuer">HubSpot Academy</div>
+    </div>
+
+    <div class="cert-item fu">
+      <div class="cert-dot"></div>
+      <div class="cert-name">Digital Leadership in Business</div>
+      <div class="cert-issuer">SimpliLearn</div>
+    </div>
+
+    <div class="cert-item fu">
+      <div class="cert-dot"></div>
+      <div class="cert-name">Fundamentals of Credit — Young Leaders</div>
+      <div class="cert-issuer">CIBIL SAKSHAM</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 4 — SKILLS & TOOLS
+══════════════════════════════════════════ -->
+<section class="page" id="p4">
+  <div class="eyebrow fu">03 — Competencies</div>
+  <h2 class="page-title fu">Skills &amp; Tools</h2>
+  <div class="divider fu"></div>
+  <div class="skills-wrap">
+
+    <div class="skill-group fu">
+      <div class="skill-group-title">Skills &amp; Abilities</div>
+      <div class="tag-grid">
+        <span class="tag">Marketing</span>
+        <span class="tag">Advertising</span>
+        <span class="tag">Digital Advertisement</span>
+        <span class="tag">Digital Marketing</span>
+        <span class="tag">Prompt Engineering</span>
+        <span class="tag">Content Creation</span>
+        <span class="tag">Generative Design</span>
+        <span class="tag">Marketing Strategies</span>
+        <span class="tag">Social Media Marketing</span>
+      </div>
+    </div>
+
+    <div class="skill-group fu">
+      <div class="skill-group-title">Software / Tools</div>
+      <div class="tag-grid">
+        <span class="tag">Canva</span>
+        <span class="tag">Generative AI</span>
+        <span class="tag">Microsoft Office</span>
+        <span class="tag">Google Ads</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 5 — PROJECTS
+══════════════════════════════════════════ -->
+<section class="page" id="p5">
+  <div class="eyebrow fu">04 — Work Done</div>
+  <h2 class="page-title fu">Projects &amp;<br>Practical Experience</h2>
+  <div class="divider fu"></div>
+  <div class="proj-list">
+
+    <div class="proj-item fu">
+      <div class="proj-bar"></div>
+      <div class="proj-num">01</div>
+      <div>
+        <div class="proj-title">Social Media Marketing Plan</div>
+        <p class="proj-desc">Conducted market research for the jewelry brand <strong>House Of RiVa</strong>, identified key challenges, and proposed strategic marketing solutions.</p>
+        <span class="proj-tag">Branding</span>
+      </div>
+    </div>
+
+    <div class="proj-item fu">
+      <div class="proj-bar"></div>
+      <div class="proj-num">02</div>
+      <div>
+        <div class="proj-title">Marico Live Project</div>
+        <p class="proj-desc">Worked on a real-world marketing case for <strong>KAYA Beads Cleanser</strong>, developing a new product positioning and digital-first 360° marketing strategy.</p>
+        <span class="proj-tag">360° Strategy</span>
+      </div>
+    </div>
+
+    <div class="proj-item fu">
+      <div class="proj-bar"></div>
+      <div class="proj-num">03</div>
+      <div>
+        <div class="proj-title">Tee Public Online Store</div>
+        <p class="proj-desc">Created custom merchandise designs while learning <strong>SEO, product optimization, branding</strong>, and social media promotion through hands-on experimentation.</p>
+        <span class="proj-tag">E-Commerce</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 6 — ACHIEVEMENTS
+══════════════════════════════════════════ -->
+<section class="page" id="p6">
+  <div class="eyebrow fu">05 — Recognition</div>
+  <h2 class="page-title fu">Achievements</h2>
+  <div class="divider fu"></div>
+  <div class="ach-grid">
+
+    <div class="ach-card fu">
+      <span class="ach-icon">🏆</span>
+      <div class="ach-text">Achieved Top 6 Finalist on Marico Live Project</div>
+    </div>
+
+    <div class="ach-card fu">
+      <span class="ach-icon">💎</span>
+      <div class="ach-text">Got Acknowledged by the House of RiVa for the social media strategies</div>
+    </div>
+
+    <div class="ach-card fu">
+      <span class="ach-icon">💰</span>
+      <div class="ach-text">Monetized the online Tee Public store</div>
+    </div>
+
+    <div class="ach-card fu">
+      <span class="ach-icon">⚽</span>
+      <div class="ach-text">Achieved Top 3 in District Level Football Tournament</div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 7 — LEADERSHIP
+══════════════════════════════════════════ -->
+<section class="page" id="p7">
+  <div class="eyebrow fu">06 — Beyond Work</div>
+  <h2 class="page-title fu">Leadership &amp;<br>Co-Curricular Activities</h2>
+  <div class="divider fu"></div>
+  <div class="lead-grid">
+
+    <div class="lead-card fu">
+      <span class="lead-emoji">⚽</span>
+      <div class="lead-role">Football Club Leader</div>
+      <p class="lead-desc">Led the team in district-level football tournaments as captain. Coordinated training sessions and encouraged team discipline and collaboration.</p>
+    </div>
+
+    <div class="lead-card fu">
+      <span class="lead-emoji">🤖</span>
+      <div class="lead-role">NGO Volunteering at Guru Nanak Center</div>
+      <p class="lead-desc">Taught children about AI and Technology.</p>
+    </div>
+
+    <div class="lead-card fu">
+      <span class="lead-emoji">📚</span>
+      <div class="lead-role">NGO Volunteering at Umang Learning Center</div>
+      <p class="lead-desc">Taught Children as a Substitute Teacher.</p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════
+     PAGE 8 — CONTACT
+══════════════════════════════════════════ -->
+<section class="page" id="p8">
+  <div class="eyebrow fu">07 — Get In Touch</div>
+  <h2 class="page-title fu">Contact</h2>
+  <div class="divider fu"></div>
+
+  <div class="contact-grid">
+    <div class="contact-card fu">
+      <div class="contact-icon">✉</div>
+      <div class="contact-label">Email</div>
+      <div class="contact-val"><a href="mailto:afz.tabrez@gmail.com">afz.tabrez@gmail.com</a></div>
+    </div>
+    <div class="contact-card fu">
+      <div class="contact-icon">☏</div>
+      <div class="contact-label">Phone</div>
+      <div class="contact-val"><a href="tel:8209036709">+91 82090 36709</a></div>
+    </div>
+    <div class="contact-card fu">
+      <div class="contact-icon">🔗</div>
+      <div class="contact-label">LinkedIn</div>
+      <div class="contact-val"><a href="#">Afzal Shaikh</a></div>
+    </div>
+    <div class="contact-card fu">
+      <div class="contact-icon">📍</div>
+      <div class="contact-label">Location</div>
+      <div class="contact-val">Mumbai, India</div>
+    </div>
+  </div>
+
+  <div class="footer-name fu">Afzal Ahmed Shaikh</div>
+  <div class="footer-copy fu">MBA · Digital Marketing · © 2025</div>
+</section>
+
+<script>
+/* ══════════════════════════════════════════
+   LOADING SCREEN INTRO
+══════════════════════════════════════════ */
+(function(){
+  const loader=document.getElementById('loader');
+  const logEl=document.getElementById('loader-log');
+  const bar=document.getElementById('loader-bar');
+  const pctEl=document.getElementById('loader-pct');
+  const done=document.getElementById('loader-done');
+
+  const steps=[
+    {text:'> INITIALIZING SYSTEM...',pct:18},
+    {text:'> LOADING PORTFOLIO ASSETS...',pct:42},
+    {text:'> ESTABLISHING NETWORK LINK...',pct:67},
+    {text:'> CALIBRATING HUD INTERFACE...',pct:88},
+    {text:'> BOOT SEQUENCE COMPLETE.',pct:100},
+  ];
+
+  let stepIdx=0;
+
+  function typeLine(text,pct,cb){
+    const div=document.createElement('div');
+    logEl.appendChild(div);
+    let i=0;
+    const id=setInterval(()=>{
+      div.textContent=text.slice(0,++i);
+      if(i>=text.length){
+        clearInterval(id);
+        bar.style.width=pct+'%';
+        pctEl.textContent=pct+'%';
+        setTimeout(cb,280);
+      }
+    },22);
+  }
+
+  function runStep(){
+    if(stepIdx>=steps.length){
+      done.classList.add('show');
+      setTimeout(()=>{
+        loader.classList.add('out');
+        setTimeout(()=>loader.remove(),900);
+      },750);
+      return;
+    }
+    const s=steps[stepIdx++];
+    typeLine(s.text,s.pct,runStep);
+  }
+
+  setTimeout(runStep,500);
+})();
+
+/* ══════════════════════════════════════════
+   HUD BACKGROUND CANVAS
+══════════════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('hud-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+
+  function resize(){W=canvas.width=innerWidth;H=canvas.height=innerHeight;}
+  window.addEventListener('resize',resize);
+  resize();
+
+  /* Corner bracket helper */
+  function bracket(x,y,sx,sy,sz){
+    ctx.beginPath();
+    ctx.moveTo(x+sx*sz,y);
+    ctx.lineTo(x,y);
+    ctx.lineTo(x,y+sy*sz);
+    ctx.stroke();
+  }
+
+  /* Floating reticles */
+  const reticles=Array.from({length:6},()=>({
+    x:Math.random()*innerWidth,
+    y:Math.random()*innerHeight,
+    r:18+Math.random()*28,
+    vx:(Math.random()-.5)*.18,
+    vy:(Math.random()-.5)*.18,
+    phase:Math.random()*Math.PI*2,
+  }));
+
+  /* Sparse grid annotation points */
+  const gridPts=[];
+  for(let gx=.15;gx<1;gx+=.28){
+    for(let gy=.18;gy<1;gy+=.32){
+      gridPts.push({fx:gx,fy:gy,off:Math.random()*Math.PI*2});
+    }
+  }
+
+  /* Data annotation panels — fixed screen positions */
+  const panels=[
+    {fx:.06,fy:.22,lines:['ALT  003.2m','BRG  047°','SPD  0.0kt']},
+    {fx:.84,fy:.68,lines:['LAT  24.86N','LNG  067.01E','ACC  ±2m']},
+    {fx:.06,fy:.76,lines:['SYS  NOMINAL','NET  LINK OK','CPU  12%']},
+    {fx:.78,fy:.18,lines:['TGT  LOCKED','RNG  —.—km','STA  ACTIVE']},
+  ];
+
+  let t=0;
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    t+=.005;
+
+    /* ── CORNER BRACKETS ── */
+    const bsz=44;
+    ctx.strokeStyle='rgba(10,10,10,0.13)';
+    ctx.lineWidth=1.5;
+    bracket(34,34, 1, 1,bsz);
+    bracket(W-34,34,-1, 1,bsz);
+    bracket(34,H-34, 1,-1,bsz);
+    bracket(W-34,H-34,-1,-1,bsz);
+
+    /* corner coord labels */
+    ctx.font='9px "Share Tech Mono",monospace';
+    ctx.fillStyle='rgba(10,10,10,0.14)';
+    ctx.textAlign='left';  ctx.fillText('X:0000 Y:0000',50,54);
+    ctx.fillText('X:0000 Y:'+(H|0).toString().padStart(4,'0'),50,H-50);
+    ctx.textAlign='right'; ctx.fillText('X:'+(W|0).toString().padStart(4,'0')+' Y:0000',W-50,54);
+    ctx.fillText('X:'+(W|0).toString().padStart(4,'0')+' Y:'+(H|0).toString().padStart(4,'0'),W-50,H-50);
+
+    /* ── FLOATING RETICLES ── */
+    reticles.forEach(r=>{
+      r.x+=r.vx; r.y+=r.vy;
+      if(r.x<0)r.x=W; if(r.x>W)r.x=0;
+      if(r.y<0)r.y=H; if(r.y>H)r.y=0;
+
+      const pulse=.5+Math.sin(t*1.7+r.phase)*.35;
+      const a=pulse*.11;
+
+      /* outer circle */
+      ctx.beginPath();
+      ctx.arc(r.x,r.y,r.r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(10,10,10,${a})`;
+      ctx.lineWidth=.8;
+      ctx.stroke();
+
+      /* inner small circle */
+      ctx.beginPath();
+      ctx.arc(r.x,r.y,r.r*.35,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(10,10,10,${a*.6})`;
+      ctx.lineWidth=.5;
+      ctx.stroke();
+
+      /* crosshair arms */
+      ctx.strokeStyle=`rgba(10,10,10,${a*.7})`;
+      ctx.lineWidth=.5;
+      ctx.beginPath();
+      ctx.moveTo(r.x-r.r*1.5,r.y); ctx.lineTo(r.x-r.r*.55,r.y);
+      ctx.moveTo(r.x+r.r*.55,r.y); ctx.lineTo(r.x+r.r*1.5,r.y);
+      ctx.moveTo(r.x,r.y-r.r*1.5); ctx.lineTo(r.x,r.y-r.r*.55);
+      ctx.moveTo(r.x,r.y+r.r*.55); ctx.lineTo(r.x,r.y+r.r*1.5);
+      ctx.stroke();
+
+      /* center dot */
+      ctx.beginPath();
+      ctx.arc(r.x,r.y,1.4,0,Math.PI*2);
+      ctx.fillStyle=`rgba(10,10,10,${a*2})`;
+      ctx.fill();
+    });
+
+    /* ── GRID ANNOTATION DOTS ── */
+    gridPts.forEach((gp,i)=>{
+      const x=gp.fx*W+Math.sin(t*.35+gp.off)*4;
+      const y=gp.fy*H+Math.cos(t*.28+gp.off)*4;
+      const fade=(.5+Math.sin(t*.4+gp.off)*.5)*0.09;
+      ctx.beginPath();
+      ctx.arc(x,y,1.5,0,Math.PI*2);
+      ctx.fillStyle=`rgba(10,10,10,${fade})`;
+      ctx.fill();
+      /* tick line */
+      ctx.strokeStyle=`rgba(10,10,10,${fade*.6})`;
+      ctx.lineWidth=.5;
+      ctx.beginPath();
+      ctx.moveTo(x+4,y); ctx.lineTo(x+16,y);
+      ctx.stroke();
+      ctx.font='8px "Share Tech Mono",monospace';
+      ctx.textAlign='left';
+      ctx.fillStyle=`rgba(10,10,10,${fade*.8})`;
+      ctx.fillText(`${(gp.fx*100)|0}.${(gp.fy*100)|0}`,x+19,y+3);
+    });
+
+    /* ── FLOATING DATA PANELS ── */
+    panels.forEach((p,pi)=>{
+      const x=p.fx*W;
+      const y=p.fy*H;
+      const drift=Math.sin(t*.25+pi*1.3)*3;
+      const px=x, py=y+drift;
+      const fade=.12+Math.sin(t*.18+pi*.9)*.04;
+
+      const lh=14, padX=10, padY=8;
+      const boxW=118, boxH=p.lines.length*lh+padY*2;
+
+      /* panel box */
+      ctx.strokeStyle=`rgba(10,10,10,${fade*.9})`;
+      ctx.lineWidth=.7;
+      ctx.strokeRect(px,py,boxW,boxH);
+
+      /* yellow top accent line */
+      ctx.fillStyle=`rgba(232,255,0,${fade*1.2})`;
+      ctx.fillRect(px,py,boxW,2);
+
+      /* text lines */
+      ctx.font='9px "Share Tech Mono",monospace';
+      ctx.textAlign='left';
+      p.lines.forEach((line,li)=>{
+        /* randomise last value occasionally */
+        let display=line;
+        if(Math.random()<.004){
+          const parts=line.split('  ');
+          if(parts.length>1){
+            const chars='0123456789ABCDEF';
+            display=parts[0]+'  '+Array.from({length:parts[1].length},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+          }
+        }
+        ctx.fillStyle=`rgba(10,10,10,${fade*1.6})`;
+        ctx.fillText(display,px+padX,py+padY+li*lh+8);
+      });
+    });
+
+    /* ── SLOW HORIZONTAL SCAN LINE ── */
+    const scanY=((Math.sin(t*.22)+1)*.5)*H;
+    const grad=ctx.createLinearGradient(0,scanY,W,scanY);
+    grad.addColorStop(0,'transparent');
+    grad.addColorStop(.4,`rgba(232,255,0,0.04)`);
+    grad.addColorStop(.6,`rgba(232,255,0,0.04)`);
+    grad.addColorStop(1,'transparent');
+    ctx.beginPath();
+    ctx.moveTo(0,scanY); ctx.lineTo(W,scanY);
+    ctx.strokeStyle=grad;
+    ctx.lineWidth=1;
+    ctx.stroke();
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══════════════════════════════════════════
+   CURSOR
+══════════════════════════════════════════ */
+const dot=document.getElementById('cur-dot'),ring=document.getElementById('cur-ring');
+let mx=innerWidth/2,my=innerHeight/2,rx=mx,ry=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+(function cursorLoop(){
+  dot.style.left=mx+'px';dot.style.top=my+'px';
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(cursorLoop);
+})();
+document.querySelectorAll('a,.tag,.edu-card,.ach-card,.cert-item,.lead-card,.proj-item,.contact-card,.footer-name,.ndot,#glitch-name')
+  .forEach(el=>{
+    el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));
+    el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));
+  });
+
+/* ══════════════════════════════════════════
+   PARTICLE CANVAS — floating tech nodes
+══════════════════════════════════════════ */
+(function(){
+  const canvas=document.getElementById('particle-canvas');
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  const N=55,LINK=120;
+
+  function resize(){
+    W=canvas.width=innerWidth;
+    H=canvas.height=innerHeight;
+  }
+  window.addEventListener('resize',resize);
+  resize();
+
+  function rnd(a,b){return a+Math.random()*(b-a)}
+
+  for(let i=0;i<N;i++){
+    particles.push({
+      x:rnd(0,W),y:rnd(0,H),
+      vx:rnd(-.3,.3),vy:rnd(-.3,.3),
+      r:rnd(.8,2.2)
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // links
+    for(let i=0;i<N;i++){
+      for(let j=i+1;j<N;j++){
+        const p=particles[i],q=particles[j];
+        const d=Math.hypot(p.x-q.x,p.y-q.y);
+        if(d<LINK){
+          ctx.beginPath();
+          ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);
+          ctx.strokeStyle=`rgba(10,10,10,${(1-d/LINK)*0.08})`;
+          ctx.lineWidth=.6;
+          ctx.stroke();
+        }
+      }
+    }
+    // dots
+    particles.forEach(p=>{
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle='rgba(10,10,10,0.18)';
+      ctx.fill();
+    });
+    // update
+    particles.forEach(p=>{
+      p.x+=p.vx;p.y+=p.vy;
+      if(p.x<0)p.x=W;if(p.x>W)p.x=0;
+      if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ══════════════════════════════════════════
+   DATA TICKER — live hex feed bottom-left
+══════════════════════════════════════════ */
+(function(){
+  const ticker=document.getElementById('data-ticker');
+  const labels=['SYS','NET','DAT','IDX','MEM','PKT'];
+  function hex(n){return Math.floor(Math.random()*n).toString(16).toUpperCase().padStart(4,'0')}
+  function update(){
+    ticker.innerHTML=labels.map(l=>`${l} 0x${hex(65536)} ▸ ${(Math.random()*99.9).toFixed(1)}%`).join('<br>');
+  }
+  update();
+  setInterval(update,900);
+})();
+
+/* ══════════════════════════════════════════
+   HERO NAME GLITCH — every 5 seconds
+══════════════════════════════════════════ */
+const glitchName=document.getElementById('glitch-name');
+function fireGlitch(){
+  glitchName.classList.remove('glitching');
+  void glitchName.offsetWidth;
+  glitchName.classList.add('glitching');
+  setTimeout(()=>glitchName.classList.remove('glitching'),550);
+}
+setTimeout(()=>{fireGlitch();setInterval(fireGlitch,5000);},2000);
+
+/* ══════════════════════════════════════════
+   TITLE SCRAMBLE — on section entry
+══════════════════════════════════════════ */
+const CHARS='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@&%';
+function scramble(el){
+  const original=el.textContent.trim();
+  let frame=0,total=18;
+  const id=setInterval(()=>{
+    el.textContent=original.split('').map((c,i)=>{
+      if(c===' ')return ' ';
+      if(frame/total > i/original.length) return c;
+      return CHARS[Math.floor(Math.random()*CHARS.length)];
+    }).join('');
+    if(++frame>total){el.textContent=original;clearInterval(id);}
+  },40);
+}
+
+/* ══════════════════════════════════════════
+   SCROLL BAR
+══════════════════════════════════════════ */
+const sbar=document.getElementById('sbar');
+window.addEventListener('scroll',()=>{
+  sbar.style.width=(scrollY/(document.body.scrollHeight-innerHeight)*100)+'%';
+},{passive:true});
+
+/* ══════════════════════════════════════════
+   NAV DOTS
+══════════════════════════════════════════ */
+const pages=document.querySelectorAll('.page');
+const dots=document.querySelectorAll('.ndot');
+dots.forEach(d=>{
+  d.addEventListener('click',()=>{
+    pages[+d.dataset.page].scrollIntoView({behavior:'smooth'});
+  });
+});
+const pageObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const idx=[...pages].indexOf(e.target);
+      dots.forEach((d,i)=>d.classList.toggle('active',i===idx));
+    }
+  });
+},{threshold:.5});
+pages.forEach(p=>pageObserver.observe(p));
+
+/* ══════════════════════════════════════════
+   FADE-UP + SCRAMBLE REVEAL
+══════════════════════════════════════════ */
+const fuObserver=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{
+    if(e.isIntersecting){
+      setTimeout(()=>{
+        e.target.classList.add('vis');
+        if(e.target.classList.contains('page-title')) scramble(e.target);
+      },i*80);
+      fuObserver.unobserve(e.target);
+    }
+  });
+},{threshold:.08});
+document.querySelectorAll('.fu').forEach(el=>fuObserver.observe(el));
+
+/* ══════════════════════════════════════════
+   MAGNETIC TAGS
+══════════════════════════════════════════ */
+document.querySelectorAll('.tag').forEach(t=>{
+  t.addEventListener('mousemove',e=>{
+    const r=t.getBoundingClientRect();
+    t.style.transform=`translate(${(e.clientX-(r.left+r.width/2))*.22}px,${(e.clientY-(r.top+r.height/2))*.22}px)`;
+  });
+  t.addEventListener('mouseleave',()=>t.style.transform='');
+});
+
+/* ══════════════════════════════════════════
+   CARD SHIMMER — on reveal
+══════════════════════════════════════════ */
+function addShimmer(el){
+  const s=document.createElement('span');
+  s.style.cssText='position:absolute;top:0;left:-80%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(232,255,0,0.1),transparent);pointer-events:none;animation:shimmer-pass 1s ease forwards;z-index:10';
+  el.style.position='relative';
+  el.appendChild(s);
+  setTimeout(()=>s.remove(),1100);
+}
+const shimmerObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      setTimeout(()=>addShimmer(e.target),300);
+      shimmerObs.unobserve(e.target);
+    }
+  });
+},{threshold:.2});
+document.querySelectorAll('.edu-card,.ach-card,.lead-card,.contact-card,.cert-item').forEach(c=>shimmerObs.observe(c));
+
+/* ══════════════════════════════════════════
+   RANDOM VERTICAL GLITCH
+══════════════════════════════════════════ */
+const vg=document.getElementById('vglitch');
+function triggerVGlitch(){
+  vg.classList.remove('on');
+  void vg.offsetWidth;
+  vg.classList.add('on');
+  vg.addEventListener('animationend',()=>vg.classList.remove('on'),{once:true});
+  setTimeout(triggerVGlitch,4000+Math.random()*8000);
+}
+setTimeout(triggerVGlitch,3000);
+
+/* ══════════════════════════════════════════
+   SWEEP SPEED VARY
+══════════════════════════════════════════ */
+const sweep=document.getElementById('sweep');
+function varySweep(){
+  const d=(3+Math.random()*4).toFixed(2);
+  sweep.style.animationDuration=d+'s';
+  setTimeout(varySweep,(parseFloat(d)+Math.random()*3)*1000);
+}
+varySweep();
+
+/* ══════════════════════════════════════════
+   HUD RING — subtle mouse drift (fixed pos)
+══════════════════════════════════════════ */
+const hudEl=document.getElementById('hud-ring-global');
+let hx=0,hy=0;
+document.addEventListener('mousemove',e=>{
+  hx=(e.clientX/innerWidth-.5)*14;
+  hy=(e.clientY/innerHeight-.5)*14;
+});
+(function hudDrift(){
+  const cx=parseFloat(hudEl.style.getPropertyValue('--dx')||0);
+  const cy=parseFloat(hudEl.style.getPropertyValue('--dy')||0);
+  const nx=cx+(hx-cx)*.04;
+  const ny=cy+(hy-cy)*.04;
+  hudEl.style.setProperty('--dx',nx);
+  hudEl.style.setProperty('--dy',ny);
+  hudEl.style.transform=`translate(calc(-50% + ${nx}px), calc(-50% + ${ny}px))`;
+  requestAnimationFrame(hudDrift);
+})();
+</script>
+</body>
+</html>
